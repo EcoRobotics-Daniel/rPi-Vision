@@ -76,8 +76,7 @@ import edu.wpi.first.vision.VisionThread;
            }
        ]
    }
- */
-
+*/
 public final class Main {
   private static String configFile = "/boot/frc.json";
 
@@ -96,6 +95,8 @@ public final class Main {
   };
 
   public static int team;
+  public static int imgWidth;
+  public static int imgHeight;
   public static boolean server;
   public static List<CameraConfig> cameraConfigs = new ArrayList<>();
   public static List<SwitchedCameraConfig> switchedCameraConfigs = new ArrayList<>();
@@ -132,6 +133,12 @@ public final class Main {
       return false;
     }
     cam.path = pathElement.getAsString();
+
+    // camera resolution
+    JsonElement imgWidthElement = config.get("width");
+    JsonElement imgHeightElement = config.get("height");
+    imgWidth = imgWidthElement.getAsInt();
+    imgHeight = imgHeightElement.getAsInt(); 
 
     // stream properties
     cam.streamConfig = config.get("stream");
@@ -341,16 +348,18 @@ public final class Main {
           new GripPipeline(), pipeline -> {
         // do something with pipeline results
         if (!pipeline.findContoursOutput().isEmpty()) {
+
           Rect r = Imgproc.boundingRect(pipeline.findContoursOutput().get(0));
           
-          double centerX = r.x + (r.width / 2);
-          double centerY = r.y + (r.height / 2);
+          double centerX = (r.x + (r.width / 2)) - (imgWidth / 2);
+          double centerY = (r.y + (r.height / 2)) - (imgHeight / 2);
           double area = r.area();
 
           xEntry.setDouble(centerX);
           yEntry.setDouble(centerY);
           aEntry.setDouble(area);
           bEntry.setBoolean(true);
+
         } else {bEntry.setBoolean(false);}
       });
       /* something like this for GRIP:
