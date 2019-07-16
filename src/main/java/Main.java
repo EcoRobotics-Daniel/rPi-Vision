@@ -323,6 +323,7 @@ public final class Main {
     NetworkTableEntry xEntry = table.getEntry("X");
     NetworkTableEntry yEntry = table.getEntry("Y");
     NetworkTableEntry aEntry = table.getEntry("Area");
+    NetworkTableEntry bEntry = table.getEntry("targetDetected");
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
@@ -345,11 +346,12 @@ public final class Main {
           double centerX = r.x + (r.width / 2);
           double centerY = r.y + (r.height / 2);
           double area = r.area();
-          
+
           xEntry.setDouble(centerX);
           yEntry.setDouble(centerY);
           aEntry.setDouble(area);
-        }
+          bEntry.setBoolean(true);
+        } else {bEntry.setBoolean(false);}
       });
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
