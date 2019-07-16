@@ -339,13 +339,17 @@ public final class Main {
       VisionThread visionThread = new VisionThread(cameras.get(0),
           new GripPipeline(), pipeline -> {
         // do something with pipeline results
-        Rect r = Imgproc.boundingRect(pipeline.findContoursOutput().get(0));
-        double centerX = r.x + (r.width / 2);
-        double centerY = r.y + (r.height / 2);
-        double area = r.area();
-        xEntry.setDouble(centerX);
-        yEntry.setDouble(centerY);
-        aEntry.setDouble(area);
+        if (!pipeline.findContoursOutput().isEmpty()) {
+          Rect r = Imgproc.boundingRect(pipeline.findContoursOutput().get(0));
+          
+          double centerX = r.x + (r.width / 2);
+          double centerY = r.y + (r.height / 2);
+          double area = r.area();
+          
+          xEntry.setDouble(centerX);
+          yEntry.setDouble(centerY);
+          aEntry.setDouble(area);
+        }
       });
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
