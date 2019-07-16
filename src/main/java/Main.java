@@ -18,16 +18,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+//import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
+
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.vision.VisionPipeline;
+//import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
 
-import org.opencv.core.Mat;
+//import org.opencv.core.Mat;
 
 /*
    JSON format:
@@ -281,7 +287,7 @@ public final class Main {
 
   /**
    * Example pipeline.
-   */
+  
   public static class MyPipeline implements VisionPipeline {
     public int val;
 
@@ -313,6 +319,10 @@ public final class Main {
       System.out.println("Setting up NetworkTables client for team " + team);
       ntinst.startClientTeam(team);
     }
+    NetworkTable table = ntinst.getTable("visionTable");
+    NetworkTableEntry xEntry = table.getEntry("X");
+    NetworkTableEntry yEntry = table.getEntry("Y");
+    NetworkTableEntry aEntry = table.getEntry("Area");
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
@@ -327,8 +337,15 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0),
-              new MyPipeline(), pipeline -> {
+          new GripPipeline(), pipeline -> {
         // do something with pipeline results
+        Rect r = Imgproc.boundingRect(pipeline.findContoursOutput().get(0));
+        double centerX = r.x + (r.width / 2);
+        double centerY = r.y + (r.height / 2);
+        double area = r.area();
+        xEntry.setDouble(centerX);
+        yEntry.setDouble(centerY);
+        aEntry.setDouble(area);
       });
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
